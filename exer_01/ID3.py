@@ -157,21 +157,30 @@ def save_tree_to_txt(tree, file, indent=""):
     save_tree_to_txt(tree[feature]["<="], file, indent + "  ")
     save_tree_to_txt(tree[feature][">"], file, indent + "  ")
 
+# 预测测试集并保存结果
+def save_predictions_to_txt(tree, test_features, test_labels, feature_names, file_name="predictions.txt"):
+    with open(file_name, "w") as f:
+        for i in range(len(test_features)):
+            prediction = classify(tree, test_features[i], feature_names)  # 预测结果
+            true_label = test_labels[i]  # 真实标签
+            f.write(f"Sample {i+1}: True Label = {true_label}, Predicted = {prediction}\n")
+
 if __name__ == "__main__":
     feature_names = np.array(["F1", "F2", "F3", "F4"])  # 假设有 4 个特征
 
     train_features, train_labels = load_data("traindata.txt")
     test_features, test_labels = load_data("testdata.txt")
 
-    tree = build_tree(train_features, train_labels, feature_names, max_depth=10)
+    tree = build_tree(train_features, train_labels, feature_names, max_depth=30)
 
     acc = accuracy(tree, test_features, test_labels, feature_names)
     print(f"分类准确率: {acc * 100:.2f}%")
 
-    # dot = visualize_tree(tree)
-    # dot.render("decision_tree", format="txt")
     # 将决策树保存为 txt
     with open("decision_tree.txt", "w") as f:
         save_tree_to_txt(tree, f)
 
     print("决策树已保存至 decision_tree.txt")
+    # 将测试结果保存到文件
+    save_predictions_to_txt(tree, test_features, test_labels, feature_names)
+    print("预测结果已保存至 predictions.txt")
